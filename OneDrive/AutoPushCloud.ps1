@@ -2,18 +2,23 @@
 
 <#
 	.DESCRIPTION
-    This script is designed to run directly on user context if the user can run the powershell in run as admin. This script enforce
+    This script is designed to run either with SCCM or directly on user context if the user can run the powershell in run as admin. This script enforce
     the file on demand only if the OS is a Windows 10 1709 or higher. The script will also runs only if a OneDrive account is configured correctly in the
     context where we run the script.
     Once pre-requisites are met, the script will:
-    - Enforced file on demand (never succeed to find how to just enabled it in HKCU)
+    - Enforced file on demand (never succeed to find how to just enabled it)
     - Create a local folder under the context root OneDrive
     - Create a schedule task who will change the folder attribution on log in a 5 min random delay (OneDrive has to be connected to play with the attrib.exe)
+    - Create a shortcut on the desktop to run the Schedule task on demand
 	.EXAMPLE
-    .\OneDriveColdArchive.ps1
-	If pre-requisite are met will enforce file on demand, create a dedicated folder called _AutoColdArchives under your local OneDrive path and create a schedule task who will change the file attribution on it.
+    .\AutoPushCloud.ps1
+	If pre-requisite are met will enforce file on demand, create a dedicated folder called _AutoPushCloud and create a schedule task who will change the file attribution on log...
 	.NOTES
     Author: Scomnewbie
+
+    THE SCRIPT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #>
 
 Function New-WPFMessageBox {
@@ -475,8 +480,8 @@ Function New-WPFMessageBox {
 $Error.clear()
 #For the try catch
 $ErrorActionPreference = "stop"
-$AutoColdArchivesFolder = "_AutoColdArchives"
-$AppInstallLog = Join-Path $env:temp "AutoColdArchivesInstall.txt"
+$AutoPushCloudFolder = "_AutoPushCloud"
+$AppInstallLog = Join-Path $env:temp "AutoPushCloud.txt"
 
 #Let's create the logfile
 New-Item -Path $AppInstallLog -ItemType file -Force| Out-Null 
@@ -514,13 +519,20 @@ if ($Productype = 1) {
                     if ($?) {
                         Add-Content -Path $AppInstallLog -Value "Information: Modules imported successfully"
                         #Check if the schedule task already exist
-                        $ST = Get-ScheduledTask | Where-Object {$_.taskname -eq "AutoColdArchivesOnDemand"}
+                        $ST = Get-ScheduledTask | Where-Object {$_.taskname -eq "AutoPushCloudOnDemand"}
                         if ($ST -eq $null) {
                             $AreWeCool = $true
                         }
                         else {
-                            Add-Content -Path $AppInstallLog -Value "The schedule task called AutoColdArchivesOnDemand already exist, let's remove it manually first"
-                            break
+                            Add-Content -Path $AppInstallLog -Value "The schedule task called AutoPushCloudOnDemand already exist, let's remove it"
+                            Get-ScheduledTask | Where-Object {$_.taskname -eq "AutoPushCloudOnDemand"} | Unregister-ScheduledTask
+                            if ($?) {
+                                $AreWeCool = $true
+                            }
+                            else {
+                                Add-Content -Path $AppInstallLog -Value "Unable to remove the Schedule task AutoPushCloudOnDemand"
+                                break
+                            } 
                         }
                     }
                     else {
@@ -576,38 +588,87 @@ if ($Productype = 1) {
                 }#Regkey creation step
 
                 #Let's now create the local folder under user's OneDrive
-                #Should give something like C:\Users\user02\OneDrive - Répertoire par défaut\_AutoColdArchives
-                $FullPathAutoColdArchivesFolder = Join-Path $UserFolderPath $AutoColdArchivesFolder
-                if (Test-Path $FullPathAutoColdArchivesFolder) {
-                    Add-Content -Path $AppInstallLog -Value "Folder $FullPathAutoColdArchivesFolder is already created, no need to recreate it"
+                #Should give something like C:\Users\user02\OneDrive - Répertoire par défaut\_AutoPushCloud
+                $FullPathAutoPushCloudFolder = Join-Path $UserFolderPath $AutoPushCloudFolder
+                if (Test-Path $FullPathAutoPushCloudFolder) {
+                    Add-Content -Path $AppInstallLog -Value "Folder $FullPathAutoPushCloudFolder is already created, no need to recreate it"
                 }
                 else {
                     #Let's create the folder
                     try {
-                        New-Item -Path $UserFolderPath -Name  $AutoColdArchivesFolder -ItemType Directory -Force | Out-Null
+                        New-Item -Path $UserFolderPath -Name  $AutoPushCloudFolder -ItemType Directory -Force | Out-Null
                     }
                     
                     catch {
-                        Add-Content -Path $AppInstallLog -Value "Unexpected error: Unable to create local folder called $AutoColdArchivesFolder under $UserFolderPath"
+                        Add-Content -Path $AppInstallLog -Value "Unexpected error: Unable to create local folder called $AutoPushCloudFolder under $UserFolderPath"
                     }
                 }#LocalFolder creation step
 
                 #Let's now create the Schedule Task  
-                #Let's create the folder
                 try {
-                    $action = New-ScheduledTaskAction -Execute 'Powershell.exe' -Argument '-NoProfile -WindowStyle Hidden -command "& {Set-Location $(join-path (Get-ItemProperty -Path HKCU:\Software\Microsoft\OneDrive\Accounts\Business1\ | Select-Object -ExpandProperty UserFolder) "_AutoColdArchives"); attrib.exe -p +u /s}"' 
+                    $action = New-ScheduledTaskAction -Execute 'Powershell.exe' -Argument '-NoProfile -WindowStyle Hidden -command "& {Set-Location $(join-path (Get-ItemProperty -Path HKCU:\Software\Microsoft\OneDrive\Accounts\Business1\ | Select-Object -ExpandProperty UserFolder) "_AutoPushCloud"); attrib.exe -p +u /s}"' 
                     $trigger = New-JobTrigger -AtLogOn -RandomDelay (new-Timespan -Minutes 5)
                     $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 10)
-                    Register-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -TaskName "AutoColdArchivesOnDemand" -Description "This schedule task will on boot apply file on demand on the folder _AutoColdArchives" | Out-Null
+                    Register-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -TaskName "AutoPushCloudOnDemand" -Description "This schedule task will on boot apply file on demand on the folder _AutoPushCloud" | Out-Null
                     if ($?) {
                         Add-Content -Path $AppInstallLog -Value "Information: Schedule task created successfully"
+                                                
+                        #Now let's create a shortcut on the desktop
+                        try {
+                            $Name = "AutoPushCloud"
+                            $OutputDirectory = "$Home\Desktop"
+                            $Target = "C:\Windows\System32\schtasks.exe"
+                            $WindowStyle = 1
+                            $Arguments = "/run /tn `"AutoPushCloudOnDemand`""
+                                                        
+                            [System.IO.FileInfo] $LinkFileName = [System.IO.Path]::ChangeExtension($Name, "lnk")
+                            [System.IO.FileInfo] $LinkFile = [IO.Path]::Combine($OutputDirectory, $LinkFileName)
+                                                        
+                            $wshshell = New-Object -ComObject WScript.Shell
+                            $shortCut = $wshShell.CreateShortCut($LinkFile) 
+                            $shortCut.TargetPath = $Target
+                            $shortCut.WindowStyle = $WindowStyle
+                            $shortCut.Arguments = $Arguments
+                            #Remove comment if you want another icon than the default one
+                            #$MyFileName = "cloud.ico"
+                            #$filebase = Join-Path $PSScriptRoot $MyFileName
+                            #$shortCut.IconLocation = $filebase
+                            $shortCut.Save()
+                                                        
+                            $tempFileName = [IO.Path]::GetRandomFileName()
+                            $tempFile = [IO.FileInfo][IO.Path]::Combine($LinkFile.Directory, $tempFileName)
+                                                                
+                            $writer = new-object System.IO.FileStream $tempFile, ([System.IO.FileMode]::Create)
+                            $reader = $LinkFile.OpenRead()
+                                                                
+                            while ($reader.Position -lt $reader.Length) {        
+                                $byte = $reader.ReadByte()
+                                if ($reader.Position -eq 22) {
+                                    $byte = 34
+                                }
+                                $writer.WriteByte($byte)
+                            }
+                                                                
+                            $reader.Close()
+                            $writer.Close()
+                                                                
+                            $LinkFile.Delete()
+                                                                
+                            Rename-Item -Path $tempFile -NewName $LinkFile.Name
+                                                        
+                        }
+                        catch {
+                            Add-Content -Path $AppInstallLog -Value "Unexpected error: Unable to create a shortcut on the machine"
+                        }
+
                         $InfoParams = @{
                             Title               = "INFORMATION"
                             TitleFontSize       = 20
                             TitleBackground     = 'LightSkyBlue'
                             TitleTextForeground = 'Black'
                         }
-                        New-WPFMessageBox @InfoParams -Content "The OneDrive Auto File on Demand will be configured after a reboot."                         
+                        New-WPFMessageBox @InfoParams -Content "The OneDrive Auto Push Cloud on Demand will be configured after a reboot." 
+
                         #At this moment, OD is configured and SCCM is aware that the application is installed
                         #Send SCCM a soft reboot code
                         #[System.Environment]::Exit(3010)
@@ -624,7 +685,7 @@ if ($Productype = 1) {
             }
         }
         else {
-            Add-Content -Path $AppInstallLog -Value "This feature is available only starting 1709(16299), you're curretnly running build: $Build"
+            Add-Content -Path $AppInstallLog -Value "This feature is available only starting 1709(16299), you're currently running build: $Build"
         }
     }
     else {
