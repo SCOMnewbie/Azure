@@ -525,7 +525,7 @@ if ($Productype = 1) {
                         }
                         else {
                             Add-Content -Path $AppInstallLog -Value "The schedule task called AutoPushCloudOnDemand already exist, let's remove it"
-                            Get-ScheduledTask | Where-Object {$_.taskname -eq "AutoPushCloudOnDemand"} | Unregister-ScheduledTask
+                            Get-ScheduledTask | Where-Object {$_.taskname -eq "AutoPushCloudOnDemand"} | Unregister-ScheduledTask -Confirm:$false
                             if ($?) {
                                 $AreWeCool = $true
                             }
