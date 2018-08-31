@@ -12,8 +12,8 @@ Foreach ($import in @($Public + $Private)) {
     }
 }
 
-If ((Compare-Module -Name AzureRM).UpdateNeeded) {
-    Write-Warning -Message "The AzureRM Module has an update available on PSGallery"
+if($((Compare-module -name AzureRM).UpdateNeeded)){
+    Write-Warning "Module AzureRM has a new version available on PsGallery"
 }
 
 # Here I might...

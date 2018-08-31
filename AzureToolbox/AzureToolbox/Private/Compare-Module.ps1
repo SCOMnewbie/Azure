@@ -193,5 +193,3 @@ Function Compare-Module {
     
 #define an optional alias
 Set-Alias -Name cmo -Value Compare-Module
-
-Compare-Module AzureRM -Verbose
