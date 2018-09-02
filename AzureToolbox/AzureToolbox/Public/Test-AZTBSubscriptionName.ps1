@@ -3,7 +3,7 @@ Function Test-AZTBSubscriptionName {
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
         [ValidateNotNullOrEmpty()]
-        [ValidateSet("Ubisoft", "Longtail", "Guillemot", IgnoreCase = $false)] 
+        [ValidateSet("Company", "Subcompany", IgnoreCase = $false)] 
         [String] 
         $CompanyName 
         , 
@@ -47,7 +47,7 @@ Function Test-AZTBSubscriptionName {
 
 <#
 $params = @{
-    'CompanyName'='Ubisoft';
+    'CompanyName'='Company';
 	'Department'='rB6';
     'ApplicationName'='Myapps';
     'Environement'='PROD'
