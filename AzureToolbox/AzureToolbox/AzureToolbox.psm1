@@ -12,9 +12,6 @@ Foreach ($import in @($Public + $Private)) {
     }
 }
 
-if($((Compare-module -name AzureRM).UpdateNeeded)){
-    Write-Warning "Module AzureRM has a new version available on PsGallery"
-}
 
 # Here I might...
 # Read in or create an initial config file and variable
