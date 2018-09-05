@@ -98,9 +98,17 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
         $ApplicationName
     ) 
     Process { 
-        Write-Verbose "Start validate Tags"
-        #Add -Tag as the end + output = object with 2 properties Isvalidated + OutputName
-        $true
-        Write-Verbose "End validate Tags"
+
+        $properties = @{
+            'Isvalidated'     = $true
+            'BillTo'          = $BillTo
+            'Department'      = $Department
+            'Environement'    = $Environement
+            'Tier'            = $Tier
+            'Owner'           = $Owner
+            'ApplicationName' = $ApplicationName
+        }
+        New-Object -TypeName Psobject -Property $properties
+        
     } 
 }
