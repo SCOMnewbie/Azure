@@ -113,7 +113,7 @@ Describe "Test-AZTBTagValues Function" {
         }
 
         It 'GOOD spelling should Be OK' {
-            $Test = (Test-AZTBTagValues @params).isvalidated
+            $Test = (Test-AZTBTagValues @params).isvalid
             $Test|Should be true
         }
     }

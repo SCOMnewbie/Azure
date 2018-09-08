@@ -49,7 +49,7 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
         [ValidateNotNullOrEmpty()]
         [ValidateScript( {
-                if ( $_ -cmatch '^[A-Z][A-Z0-9]{2,10}') {
+                if ( $((Get-Culture).TextInfo.ToUpper($_)) -cmatch '^[A-Z][A-Z0-9]{2,10}') {
                     $true
                 }
                 else {
@@ -75,7 +75,7 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
         [ValidateNotNullOrEmpty()]
         [ValidateScript( {
                 #Not a perfect regex but will be OK because we will take the current UPN
-                if ( $_ -match '^.+@.+\..+$') {
+                if ( $((Get-Culture).TextInfo.ToLower($_)) -match '^.+@.+\..+$') {
                     $true
                 }
                 else {
@@ -87,7 +87,7 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
         , 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName)] 
         [ValidateScript( {
-                if ( $_ -cmatch '^[A-Z][a-z0-9]{3,19}') {
+                if ( $((Get-Culture).TextInfo.ToTitleCase($_)) -cmatch '^[A-Z][a-z0-9]{3,19}') {
                     $true
                 }
                 else {
@@ -100,15 +100,25 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
     Process { 
 
         $properties = @{
-            'Isvalidated'     = $true
+            'Isvalid'         = $true
             'BillTo'          = $BillTo
-            'Department'      = $Department
+            'Department'      = $((Get-Culture).TextInfo.ToUpper($Department))
             'Environement'    = $Environement
             'Tier'            = $Tier
-            'Owner'           = $Owner
-            'ApplicationName' = $ApplicationName
+            'Owner'           = $((Get-Culture).TextInfo.ToLower($Owner))
+            'ApplicationName' = $((Get-Culture).TextInfo.ToTitleCase($ApplicationName))
         }
         New-Object -TypeName Psobject -Property $properties
         
     } 
 }
+
+$params = @{
+    'BillTo'          = 'BillCode1'
+    'Department'      = 'TfdsfEST'
+    'ApplicationName' = 'MyaGDFGps'
+    'Environement'    = 'PROD'
+    'Tier'            = 'Application Tier'
+    'Owner'           = 'fraGDSFGois.leon@company.com'
+}
+Test-AZTBTagValues @params

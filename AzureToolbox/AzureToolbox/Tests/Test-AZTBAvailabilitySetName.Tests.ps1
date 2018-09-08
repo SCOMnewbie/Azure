@@ -1,8 +1,8 @@
 <#
 .Synopsis
-    Pester test to verify the function Test-AZTBResourceGroupName.
+    Pester test to verify the function Test-AZTBAvailabilitySetName.
 .Description
-    Pester test to verify the function Test-AZTBResourceGroupName.
+    Pester test to verify the function Test-AZTBAvailabilitySetName.
 
 #>
 [CmdletBinding()]
@@ -22,7 +22,7 @@ $ModuleFile = "$(Split-Path -Parent -Path (Split-Path -Parent -Path $MyInvocatio
 Import-module -Name $ManifestFile -PassThru
 Import-module -Name $ModuleFile -PassThru
 
-Describe "Test-AZTBResourceGroupName Function" {
+Describe "Test-AZTBAvailabilitySetName Function" {
 
     Context 'Function Output' {
         $params = @{
@@ -31,7 +31,7 @@ Describe "Test-AZTBResourceGroupName Function" {
         }
 
         It 'Bad ServiceShortName spelling should throw' {
-            {Test-AZTBResourceGroupName @params }|Should throw
+            {Test-AZTBAvailabilitySetName @params }|Should throw
         }
 
         $params = @{
@@ -40,7 +40,7 @@ Describe "Test-AZTBResourceGroupName Function" {
         }
 
         It 'Bad environment spelling should throw' {
-            {Test-AZTBResourceGroupName @params }|Should throw
+            {Test-AZTBAvailabilitySetName @params }|Should throw
         }
 
         $params = @{
@@ -49,13 +49,13 @@ Describe "Test-AZTBResourceGroupName Function" {
         }
 
         It 'GOOD spelling should Be OK' {
-            $Test = (Test-AZTBResourceGroupName @params).isvalid
+            $Test = (Test-AZTBAvailabilitySetName @params).isvalid
             $Test|Should be true
         }
 
-        It 'Name should contain -rg' {
-            $Test = (Test-AZTBResourceGroupName @params).ResourceGroupName
-            $Test|Should belike "*-rg"
+        It 'Name should contain -as' {
+            $Test = (Test-AZTBAvailabilitySetName @params).AvailabilitySetName
+            $Test|Should belike "*-as"
         }
 
     }

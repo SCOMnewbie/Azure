@@ -1,9 +1,9 @@
-Function Test-AZTBResourceGroupName { 
+Function Test-AZTBAvailabilitySetName { 
     <#
 .SYNOPSIS
-	Function to validate and output the resource group name 
+	Function to validate and output the avaibality set name 
 .DESCRIPTION
-	Function to validate and output the resource group name. A resource group must always finish with -rg
+	Function to validate and output the resource group name. A resource group must always finish with -as
 .PARAMETER ServiceShortName
     Specifies the name of the Service name in a short version. This is a mandatory field. The length should be between 4 and 20 characters with the first letter in Uppercase
     and the rest in lowercase without whitespace.
@@ -14,9 +14,9 @@ Function Test-AZTBResourceGroupName {
     'ServiceShortName'='Myservicename'
     'Environement'='PROD'
     }
-    Test-AZTBResourceGroupName @params
+    Test-AZTBAvailabilitySetName @params
 .EXAMPLE
-    Test-AZTBResourceGroupName -ServiceShortName Myservicename -Environement DEV                             
+    Test-AZTBAvailabilitySetName -ServiceShortName Myservicename -Environement DEV                             
 .NOTES
 	Francois LEON
 	https://scomnewbie.wordpress.com/
@@ -29,12 +29,6 @@ Function Test-AZTBResourceGroupName {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
-        [ValidateNotNullOrEmpty()]
-        [ValidateSet("PROD", "DEV", "UAT", IgnoreCase = $false)] 
-        [string] 
-        $Environement
-        , 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
         [ValidateScript( {
                 if ( $_ -cmatch '^[A-Z][a-z0-9]{3,19}') {
                     $true
@@ -45,13 +39,19 @@ Function Test-AZTBResourceGroupName {
             })] 
         [string] 
         $ServiceShortName
+        ,
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet("PROD", "DEV", "UAT", IgnoreCase = $false)] 
+        [string] 
+        $Environement
     ) 
     Process { 
 
-        $ResourceGroupName = "$ServiceShortName-$Environement-rg"
+        $AvailabilityName = "$ServiceShortName-$Environement-as"
         $properties = @{
-            'Isvalid'           = $true
-            'ResourceGroupName' = $ResourceGroupName
+            'Isvalid'             = $true
+            'AvailabilitySetName' = $AvailabilityName
         }
         New-Object -TypeName Psobject -Property $properties
         
