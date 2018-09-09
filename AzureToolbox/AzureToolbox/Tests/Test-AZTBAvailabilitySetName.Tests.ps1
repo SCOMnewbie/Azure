@@ -26,8 +26,8 @@ Describe "Test-AZTBAvailabilitySetName Function" {
 
     Context 'Function Output' {
         $params = @{
-            'ServiceShortName' = 'MyServiceName'
-            'Environement'     = 'PROD'
+            'ServiceShortName' = 'My Service Name'
+            'Environment'      = 'PROD'
         }
 
         It 'Bad ServiceShortName spelling should throw' {
@@ -36,7 +36,7 @@ Describe "Test-AZTBAvailabilitySetName Function" {
 
         $params = @{
             'ServiceShortName' = 'MyServicename'
-            'Environement'     = 'prod'
+            'Environment'      = 'd e v'
         }
 
         It 'Bad environment spelling should throw' {
@@ -44,18 +44,18 @@ Describe "Test-AZTBAvailabilitySetName Function" {
         }
 
         $params = @{
-            'ServiceShortName' = 'Myservicename'
-            'Environement'     = 'PROD'
+            'ServiceShortName' = 'MyservICEname'
+            'Environment'      = 'ProD'
         }
 
         It 'GOOD spelling should Be OK' {
-            $Test = (Test-AZTBAvailabilitySetName @params).isvalid
+            $Test = (Test-AZTBAvailabilitySetName @params).isNamingvalid
             $Test|Should be true
         }
 
         It 'Name should contain -as' {
             $Test = (Test-AZTBAvailabilitySetName @params).AvailabilitySetName
-            $Test|Should belike "*-as"
+            $Test|Should beExactly "Myservicename-prod-as"
         }
 
     }

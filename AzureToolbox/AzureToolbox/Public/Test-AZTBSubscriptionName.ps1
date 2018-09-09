@@ -11,8 +11,8 @@ Function Test-AZTBSubscriptionName {
 .PARAMETER ApplicationName
     Specifies the applicationname. This is an optionnal field. The length should be between 4 and 20 characters with the first letter in Uppercase
     and the rest in lowercase without whitespace.
-.PARAMETER Environement
-Specifies the Environement. This is a mandatory field where you must have only a list of choices of your Environement.
+.PARAMETER Environment
+Specifies the Environment. This is a mandatory field where you must have only a list of choices of your Environement.
 .EXAMPLE
 	$params = @{
     'CompanyName'='Company';
@@ -42,7 +42,7 @@ Specifies the Environement. This is a mandatory field where you must have only a
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
         [ValidateNotNullOrEmpty()]
         [ValidateScript( {
-                if ( $_ -cmatch '^[A-Z][A-Z0-9]{2,10}') {
+                if ( $_ -cmatch '^[A-Z][A-Z0-9]{2,10}$') {
                     $true
                 }
                 else {
@@ -54,7 +54,7 @@ Specifies the Environement. This is a mandatory field where you must have only a
         , 
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName)] 
         [ValidateScript( {
-                if ( $_ -cmatch '^[A-Z][a-z0-9]{3,19}') {
+                if ( $_ -cmatch '^[A-Z][a-z0-9]{3,19}$') {
                     $true
                 }
                 else {
@@ -68,7 +68,7 @@ Specifies the Environement. This is a mandatory field where you must have only a
         [ValidateNotNullOrEmpty()]
         [ValidateSet("PROD", "DEV", "UAT", IgnoreCase = $false)] 
         [string] 
-        $Environement
+        $Environment
     ) 
     Process { 
         Write-Verbose "Start validate subscriptionName"

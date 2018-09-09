@@ -1,9 +1,9 @@
 Function Test-AZTBTagValues { 
     <#
 .SYNOPSIS
-	Function to validate Tag on a specific resource
+	Function to validate Tag on a specific resource. This function return also the TAG list in correct syntax.
 .DESCRIPTION
-	Function to validate Tag on a specific resource
+	Function to validate Tag on a specific resource. This function return also the TAG list in correct syntax.
 .PARAMETER BillTo
     Specifies the name of the BillTo. This is a mandatory field based on a list of choices. All Management codes as to be pre-filled.
 .PARAMETER Department
@@ -85,9 +85,10 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
         [String]
         $Owner
         , 
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName)] 
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]        
         [ValidateScript( {
-                if ( $((Get-Culture).TextInfo.ToTitleCase($_)) -cmatch '^[A-Z][a-z0-9]{3,19}') {
+                if ( $((Get-Culture).TextInfo.ToTitleCase($_)) -cmatch '^[A-Z][a-z0-9]{3,19}$') {
                     $true
                 }
                 else {
@@ -100,7 +101,7 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
     Process { 
 
         $properties = @{
-            'Isvalid'         = $true
+            'IsNamingvalid'   = $true
             'BillTo'          = $BillTo
             'Department'      = $((Get-Culture).TextInfo.ToUpper($Department))
             'Environement'    = $Environement
@@ -113,12 +114,3 @@ Specifies the Owner of the resource group. This is a mandatory field where you m
     } 
 }
 
-$params = @{
-    'BillTo'          = 'BillCode1'
-    'Department'      = 'TfdsfEST'
-    'ApplicationName' = 'MyaGDFGps'
-    'Environement'    = 'PROD'
-    'Tier'            = 'Application Tier'
-    'Owner'           = 'fraGDSFGois.leon@company.com'
-}
-Test-AZTBTagValues @params

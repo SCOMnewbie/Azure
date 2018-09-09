@@ -10,7 +10,7 @@ Function Test-AZTBVMName {
     and the rest in lowercase without whitespace.
 .PARAMETER Role
     Specify the role of the VM.A short description is strongly recomanded (<=4 characters) like sql,file,iis,apch,bck... This is a mandatory field. The length should be between 2 and 5 characters with all characters in lowercase without whitespace.
-.PARAMETER RessourceGroup
+.PARAMETER RessourceGroupName
     Specify the resource group where belongs la VM.
 .EXAMPLE
 $params = @{
@@ -35,7 +35,7 @@ Test-AZTBVMName @params
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
         [ValidateNotNullOrEmpty()]
         [ValidateScript( {
-                if ( $_ -cmatch '^[A-Z][a-z]{1,5}') {
+                if ( $((Get-Culture).TextInfo.ToTitleCase($_)) -cmatch '^[A-Z][a-z]{1,5}$') {
                     $true
                 }
                 else {
@@ -48,7 +48,7 @@ Test-AZTBVMName @params
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
         [ValidateNotNullOrEmpty()]
         [ValidateScript( {
-                if ( $_ -cmatch '^[a-z]{2,4}') {
+                if ( $((Get-Culture).TextInfo.ToLower($_)) -cmatch '^[a-z]{2,4}$') {
                     $true
                 }
                 else {
@@ -108,6 +108,8 @@ Test-AZTBVMName @params
 
             $NextAvailableNameIs = "{0:D2}" -f $NextAvailableNameIs
             
+            $Name = $((Get-Culture).TextInfo.ToTitleCase($Name))
+            $Role = $((Get-Culture).TextInfo.ToLower($Role))
             $properties = @{
                 'IsNamingvalid' = $true
                 'VMName'        = "$Name-$role-vm$NextAvailableNameIs"
@@ -116,12 +118,15 @@ Test-AZTBVMName @params
         }
         else {
             #Means that it will be the first vm
+            $Name = $((Get-Culture).TextInfo.ToTitleCase($Name))
+            $Role = $((Get-Culture).TextInfo.ToLower($Role))
             $properties = @{
                 'IsNamingvalid' = $true
                 'VMName'        = "$Name-$role-vm01"
             }
             New-Object -TypeName Psobject -Property $properties
-
         }    
     } 
 }
+
+Test-AZTBVMName -Name PrOfX -Role SqL -ResourceGroupName TestAZTB

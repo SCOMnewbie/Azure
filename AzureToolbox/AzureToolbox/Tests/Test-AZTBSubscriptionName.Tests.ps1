@@ -29,7 +29,7 @@ Describe "Test-AZTBSubscriptionName Function" {
             'CompanyName'     = 'company';
             'Department'      = 'rB6';
             'ApplicationName' = 'Myapps';
-            'Environement'    = 'PROD'
+            'Environment'     = 'PROD'
         }
 
         It 'Bad company spelling should throw' {
@@ -40,7 +40,7 @@ Describe "Test-AZTBSubscriptionName Function" {
             'CompanyName'     = 'Company';
             'Department'      = 'rB6';
             'ApplicationName' = 'Myapps';
-            'Environement'    = 'PROD'
+            'Environment'     = 'PROD'
         }
 
         It 'Bad department spelling should throw' {
@@ -51,7 +51,7 @@ Describe "Test-AZTBSubscriptionName Function" {
             'CompanyName'     = 'Company';
             'Department'      = 'RB6';
             'ApplicationName' = 'myapps';
-            'Environement'    = 'PROD'
+            'Environment'     = 'PROD'
         }
 
         It 'Bad applicationName spelling should throw' {
@@ -62,7 +62,7 @@ Describe "Test-AZTBSubscriptionName Function" {
             'CompanyName'     = 'Company';
             'Department'      = 'RB6';
             'ApplicationName' = 'myapps';
-            'Environement'    = 'PRO'
+            'Environment'     = 'PRO'
         }
 
         It 'Bad Environament spelling should throw' {
@@ -73,7 +73,7 @@ Describe "Test-AZTBSubscriptionName Function" {
             'CompanyName'     = 'Company';
             'Department'      = 'RB6';
             'ApplicationName' = 'Myapps';
-            'Environement'    = 'PROD'
+            'Environment'     = 'PROD'
         }
 
         It 'GOOD spelling should Be OK' {

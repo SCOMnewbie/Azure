@@ -7,7 +7,7 @@ Function Test-AZTBResourceGroupName {
 .PARAMETER ServiceShortName
     Specifies the name of the Service name in a short version. This is a mandatory field. The length should be between 4 and 20 characters with the first letter in Uppercase
     and the rest in lowercase without whitespace.
-.PARAMETER Environement
+.PARAMETER Environment
     Specifies the Environement. This is a mandatory field where you must have only a list of choices of your Environement.
 .EXAMPLE
 	$params = @{
@@ -30,13 +30,14 @@ Function Test-AZTBResourceGroupName {
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
         [ValidateNotNullOrEmpty()]
-        [ValidateSet("PROD", "DEV", "UAT", IgnoreCase = $false)] 
+        [ValidateSet("PROD", "DEV", "UAT")] 
         [string] 
-        $Environement
+        $Environment
         , 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName)] 
+        [ValidateNotNullOrEmpty()]
         [ValidateScript( {
-                if ( $_ -cmatch '^[A-Z][a-z0-9]{3,19}') {
+                if ( $((Get-Culture).TextInfo.ToTitleCase($_)) -cmatch '^[A-Z][a-z0-9]{3,19}$') {
                     $true
                 }
                 else {
@@ -48,9 +49,11 @@ Function Test-AZTBResourceGroupName {
     ) 
     Process { 
 
-        $ResourceGroupName = "$ServiceShortName-$Environement-rg"
+        $ServiceShortName = $((Get-Culture).TextInfo.ToTitleCase($ServiceShortName))
+        $Environment = $Environment.ToLower()
+        $ResourceGroupName = "$ServiceShortName-$Environment-rg"
         $properties = @{
-            'Isvalid'           = $true
+            'IsNamingvalid'     = $true
             'ResourceGroupName' = $ResourceGroupName
         }
         New-Object -TypeName Psobject -Property $properties

@@ -26,8 +26,8 @@ Describe "Test-AZTBResourceGroupName Function" {
 
     Context 'Function Output' {
         $params = @{
-            'ServiceShortName' = 'MyServiceName'
-            'Environement'     = 'PROD'
+            'ServiceShortName' = 'My Service Name'
+            'Environment'      = 'PROD'
         }
 
         It 'Bad ServiceShortName spelling should throw' {
@@ -36,7 +36,7 @@ Describe "Test-AZTBResourceGroupName Function" {
 
         $params = @{
             'ServiceShortName' = 'MyServicename'
-            'Environement'     = 'prod'
+            'Environment'      = 'prod or dev'
         }
 
         It 'Bad environment spelling should throw' {
@@ -44,18 +44,18 @@ Describe "Test-AZTBResourceGroupName Function" {
         }
 
         $params = @{
-            'ServiceShortName' = 'Myservicename'
-            'Environement'     = 'PROD'
+            'ServiceShortName' = 'MyservICename'
+            'Environment'      = 'PROD'
         }
 
         It 'GOOD spelling should Be OK' {
-            $Test = (Test-AZTBResourceGroupName @params).isvalid
+            $Test = (Test-AZTBResourceGroupName @params).isNamingvalid
             $Test|Should be true
         }
 
         It 'Name should contain -rg' {
             $Test = (Test-AZTBResourceGroupName @params).ResourceGroupName
-            $Test|Should belike "*-rg"
+            $Test|Should beexactly "Myservicename-prod-rg"
         }
 
     }

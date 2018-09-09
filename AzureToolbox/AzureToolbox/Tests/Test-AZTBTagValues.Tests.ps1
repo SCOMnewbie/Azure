@@ -40,7 +40,7 @@ Describe "Test-AZTBTagValues Function" {
 
         $params = @{
             'BillTo'          = 'BillCode1'
-            'Department'      = 'tEST'
+            'Department'      = 't@EST'
             'ApplicationName' = 'Myapps'
             'Environement'    = 'PROD'
             'Tier'            = 'Application Tier'
@@ -54,7 +54,7 @@ Describe "Test-AZTBTagValues Function" {
         $params = @{
             'BillTo'          = 'BillCode1'
             'Department'      = 'TEST'
-            'ApplicationName' = 'myapps'
+            'ApplicationName' = 'myapps should throw'
             'Environement'    = 'PROD'
             'Tier'            = 'Application Tier'
             'Owner'           = 'francois.leon@company.com'
@@ -105,16 +105,31 @@ Describe "Test-AZTBTagValues Function" {
 
         $params = @{
             'BillTo'          = 'BillCode1'
-            'Department'      = 'TEST'
-            'ApplicationName' = 'Myapps'
+            'Department'      = 'TesT'
+            'ApplicationName' = 'MyaPps'
             'Environement'    = 'PROD'
             'Tier'            = 'Application Tier'
-            'Owner'           = 'francois.leon@company.com'
+            'Owner'           = 'fraNCOIs.leon@compANy.com'
         }
 
         It 'GOOD spelling should Be OK' {
-            $Test = (Test-AZTBTagValues @params).isvalid
+            $Test = (Test-AZTBTagValues @params).isNamingValid
             $Test|Should be true
+        }
+
+        It 'Weird spelling application name should Be OK' {
+            $Test = (Test-AZTBTagValues @params).ApplicationName
+            $Test|Should BeExactly 'Myapps'
+        }
+
+        It 'Weird spelling owner should Be OK' {
+            $Test = (Test-AZTBTagValues @params).Owner
+            $Test|Should BeExactly 'francois.leon@company.com'
+        }
+
+        It 'Weird spelling department should Be OK' {
+            $Test = (Test-AZTBTagValues @params).Department
+            $Test|Should BeExactly 'TEST'
         }
     }
 }
