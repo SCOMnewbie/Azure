@@ -1,6 +1,7 @@
 function Get-LocationList {
     
-    az account list-locations --query "[].name" -o tsv
+    $Object = az account list-locations | ConvertFrom-Json
+    return $Object
 }
 
 
