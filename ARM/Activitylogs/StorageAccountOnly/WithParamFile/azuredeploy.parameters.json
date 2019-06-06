@@ -1,0 +1,12 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountId": {
+            "value": "/subscriptions/<SubID>/resourceGroups/Test-DumpLogs/providers/Microsoft.Storage/storageAccounts/testdumplogs"
+        },
+        "RetentionDays": {
+            "value": 16
+        }
+    }
+}

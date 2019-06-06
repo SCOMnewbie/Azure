@@ -1,0 +1,12 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serviceBusRuleId": {
+            "value": "/subscriptions/<Your Sub ID>/resourceGroups/Test-DumpLogs/providers/Microsoft.EventHub/namespaces/TestDumpLogs/authorizationrules/RootManageSharedAccessKey"
+        },
+        "RetentionDays": {
+            "value": 16
+        }
+    }
+}

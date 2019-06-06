@@ -1,0 +1,91 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.2",
+    "parameters": {
+        "subscriptionId": {
+            "type": "string",
+            "metadata": {
+                "description": "On which Subscription you will deploy the template"
+            }
+        },
+        "resourcegroupname": {
+            "type": "string",
+            "metadata": {
+                "description": "On which resource group you will deploy the template"
+            }
+        },
+        "storageaccountname": {
+            "type": "string",
+            "metadata": {
+                "description": "On which storage account you will deploy the template"
+            }
+        },
+        "RetentionDays": {
+            "type": "int",
+            "defaultValue": 15,
+            "metadata": {
+                "description": "How many days you want to keep activity logs"
+            }
+        }
+    },
+    "variables": {
+        "storageAccountId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroupname'), '/providers/Microsoft.Storage/storageAccounts/', parameters('storageaccountname'))]"
+    },
+    "resources": [
+        {
+            "name": "default",
+            "type": "microsoft.insights/logprofiles",
+            "apiVersion": "2016-03-01",
+            "location": "eastus2",
+            "tags": {},
+            "properties": {
+                "storageAccountId": "[variables('storageAccountId')]",
+                "locations": [
+                    "australiacentral",
+                    "australiacentral2",
+                    "australiaeast",
+                    "australiasoutheast",
+                    "brazilsouth",
+                    "canadacentral",
+                    "canadaeast",
+                    "centralindia",
+                    "centralus",
+                    "eastasia",
+                    "eastus",
+                    "eastus2",
+                    "francecentral",
+                    "francesouth",
+                    "japaneast",
+                    "japanwest",
+                    "koreacentral",
+                    "koreasouth",
+                    "northcentralus",
+                    "northeurope",
+                    "southafricanorth",
+                    "southafricawest",
+                    "southcentralus",
+                    "southindia",
+                    "southeastasia",
+                    "uksouth",
+                    "ukwest",
+                    "westcentralus",
+                    "westeurope",
+                    "westindia",
+                    "westus",
+                    "westus2",
+                    "global"
+                ],
+                "categories": [
+                    "Write",
+                    "Delete",
+                    "Action"
+                ],
+                "retentionPolicy": {
+                    "enabled": true,
+                    "days": "[parameters('RetentionDays')]"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
