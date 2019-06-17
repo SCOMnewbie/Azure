@@ -1,1 +1,1 @@
-[![Deploy to azure](https://azuredeploy.net/deploybutton.svg)]()
+[![Deploy to azure](https://azuredeploy.net/deploybutton.svg)](https://deploy.azure.com/?repository=https://github.com/SCOMnewbie/Azure/tree/master/ARM/Activitylogs/EventHUBOnly?ptml=parameters.azuredeploy.json)
