@@ -1,0 +1,153 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "type": "string",
+            "metadata": {
+                "description": "On which Subscription you will deploy the template"
+            }
+        },
+        "resourcegroupname": {
+            "type": "string",
+            "metadata": {
+                "description": "On which resource group you will deploy the template"
+            }
+        },
+        "storageaccountname": {
+            "type": "string",
+            "metadata": {
+                "description": "On which storage account you will deploy the template"
+            }
+        },
+        "RetentionDays": {
+            "type": "int",
+            "defaultValue": 15,
+            "metadata": {
+                "description": "How many days you want to keep activity logs"
+            }
+        }
+    },
+    "variables": {
+        "storageAccountName": "[uniqueString(resourceGroup().id)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2019-04-01",
+            "sku": {
+                "name": "Standard_RAGRS"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "networkAcls": {}
+            }
+        },
+        {
+            "name": "[concat(variables('storageAccountName'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+            "apiVersion": "2019-04-01",
+            "dependsOn": [
+                "[variables('storageAccountName')]"
+            ],
+            "properties": {
+                "policy": {
+                    "rules": [
+                        {
+                            "name": "expirationRule",
+                            "enabled": true,
+                            "type": "Lifecycle",
+                            "definition": {
+                                "filters": {
+                                    "blobTypes": [
+                                        "blockBlob"
+                                    ]
+                                },
+                                "actions": {
+                                    "baseBlob": {
+                                        "delete": {
+                                            "daysAfterModificationGreaterThan": 365
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "name": "snapshotRule",
+                            "enabled": true,
+                            "type": "Lifecycle",
+                            "definition": {
+                                "filters": {
+                                    "blobTypes": [
+                                        "blockBlob"
+                                    ],
+                                    "prefixMatch": [
+                                        "activedata"
+                                    ]
+                                },
+                                "actions": {
+                                    "snapshot": {
+                                        "delete": {
+                                            "daysAfterCreationGreaterThan": 90
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "name": "archiveRule",
+                            "enabled": true,
+                            "type": "Lifecycle",
+                            "definition": {
+                                "filters": {
+                                    "blobTypes": [
+                                        "blockBlob"
+                                    ],
+                                    "prefixMatch": [
+                                        "archivecontainer"
+                                    ]
+                                },
+                                "actions": {
+                                    "baseBlob": {
+                                        "tierToArchive": {
+                                            "daysAfterModificationGreaterThan": 0
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "name": "agingRule",
+                            "enabled": true,
+                            "type": "Lifecycle",
+                            "definition": {
+                                "filters": {
+                                    "blobTypes": [
+                                        "blockBlob"
+                                    ],
+                                    "prefixMatch": [
+                                        "container1/foo",
+                                        "container2/bar"
+                                    ]
+                                },
+                                "actions": {
+                                    "baseBlob": {
+                                        "tierToCool": {
+                                            "daysAfterModificationGreaterThan": 30
+                                        },
+                                        "tierToArchive": {
+                                            "daysAfterModificationGreaterThan": 90
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
