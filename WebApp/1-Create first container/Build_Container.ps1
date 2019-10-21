@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 docker build -t poc-ud .
 
 #run it
-docker run --rm poc-ud
+docker run --rm -p 80:80 poc-ud
 
 #Mass clean the exited/created containers because I've forgot the --rm
 docker ps -a --format '{{json .}}' | ConvertFrom-Json | where Status -match 'Created|exited' | Select-Object -ExpandProperty ID | %{docker rm $_}
