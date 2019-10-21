@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/powershell:latest
+LABEL key="Scomnewbie" 
+
+#Set working directory so stuff does not end up in /
+WORKDIR /stuff
+
+#Install module
+#https://docs.docker.com/engine/reference/builder/
+SHELL ["pwsh", "-command", "$ErrorActionPreference = 'Stop';"]
+RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+RUN Install-Module UniversalDashboard.Community -AcceptLicense
+RUN Install-module Pester
+
+#COPY Files
+COPY ./Start-UDRestAPI.ps1 /stuff
+
+#Let's start polaris
+ENTRYPOINT /stuff/Start-UDRestAPI.ps1
+
