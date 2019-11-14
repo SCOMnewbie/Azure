@@ -1,0 +1,73 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "DiagnosticName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of your dignostic Settings"
+            }
+        },
+        "eventHubAuthorizationRuleId": {
+            "type": "string",
+            "metadata": {
+                "description": "/subscriptions/<Your Sub ID>/resourceGroups/<Your RG Name>/providers/Microsoft.EventHub/namespaces/<your Namespace>/AuthorizationRules/RootManageSharedAccessKey"
+            }
+        },
+        "eventHubName": {
+            "type": "string",
+            "metadata": {
+                "description": "Ex: insights-operational-logs"
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "[parameters('DiagnosticName')]",
+            "type": "microsoft.insights/diagnosticSettings",
+            "apiVersion": "2017-05-01-preview",
+            "properties": {
+                "eventHubAuthorizationRuleId": "[parameters('eventHubAuthorizationRuleId')]",
+                "eventHubName": "[parameters('eventHubName')]",
+                "logs": [
+                    {
+                        "category": "Administrative",
+                        "enabled": true
+                    },
+                    {
+                        "category": "ServiceHealth",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Security",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Alert",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Recommendation",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Policy",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Autoscale",
+                        "enabled": true
+                    },
+                    {
+                        "category": "ResourceHealth",
+                        "enabled": true
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
