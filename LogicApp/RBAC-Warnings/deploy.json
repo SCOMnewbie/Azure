@@ -1,0 +1,812 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "metadata":{
+        "comments": "This two Logic Apps will read RBAC changes (add and remove are different). It will then notify a team.",
+        "author": "Francois LEON"
+    },
+    "parameters": {
+        "LogicAppName": {
+            "type": "string",
+            "defaultValue": "AuditRBAC",
+            "metadata": {
+                "description": "Use as basic name for the two logic apps"
+            }
+        },
+        "UserName": {
+            "defaultValue": "<username>@<domain>",
+            "type": "string",
+            "metadata": {
+                "description": "Account used to connect to Teams"
+            }
+        },
+        "TeamsGroupId": {
+            "defaultValue": "012abcde-ab72-58fg-a862-4156fsdf756a5",
+            "type": "string",
+            "metadata": {
+                "description": "Id of the Teams group you want to target"
+            }
+        },
+        "TeamsChannelId": {
+            "defaultValue": "<UniqueId>@thread.skype",
+            "type": "string",
+            "metadata": {
+                "description": "Id of the Teams channel you want to target"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "WebConnectionAPIVersion": "2016-06-01",
+        "LogicWorkflowAPIVersion": "2016-06-01",
+        "ActionGroupAPIVersion": "2019-03-01",
+        "ActivityLogAlertsAPIVersion": "2017-04-01",
+        "TeamsConnectionName": "[concat('Teams-', parameters('LogicAppName'))]",
+        "AddRoleLogicAppName": "[concat(parameters('LogicAppName'), 'Add')]",
+        "RemoveRoleLogicAppName": "[concat(parameters('LogicAppName'), 'Remove')]",
+        "TeamsPath": "[concat('/v3/beta/teams/@{encodeURIComponent(''', parameters('TeamsGroupId'), ''')}/channels/@{encodeURIComponent(''', parameters('TeamsChannelId'), ''')}/messages' )]",
+        "SubscriptionScope": "[concat('/subscriptions/', subscription().subscriptionId)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "[variables('WebConnectionAPIVersion')]",
+            "name": "[variables('TeamsConnectionName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+            "displayName": "[parameters('UserName')]",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "[variables('LogicWorkflowAPIVersion')]",
+            "name": "[variables('AddRoleLogicAppName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "method": "POST",
+                                "schema": {
+                                    "properties": {
+                                        "body": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "context": {
+                                                            "properties": {
+                                                                "activityLog": {
+                                                                    "properties": {
+                                                                        "authorization": {
+                                                                            "properties": {
+                                                                                "action": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "scope": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "caller": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "channels": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "claims": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "correlationId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "description": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "eventDataId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "eventSource": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "eventTimestamp": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "httpRequest": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "level": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "operationId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "operationName": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "properties": {
+                                                                            "properties": {
+                                                                                "category": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "requestbody": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "resourceId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "resourceProviderName": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "resourceType": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "status": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "subStatus": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "submissionTimestamp": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "subscriptionId": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "properties": {
+                                                            "properties": {},
+                                                            "type": "object"
+                                                        },
+                                                        "status": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "schemaId": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "headers": {
+                                            "properties": {
+                                                "Connection": {
+                                                    "type": "string"
+                                                },
+                                                "Content-Length": {
+                                                    "type": "string"
+                                                },
+                                                "Content-Type": {
+                                                    "type": "string"
+                                                },
+                                                "Expect": {
+                                                    "type": "string"
+                                                },
+                                                "Host": {
+                                                    "type": "string"
+                                                },
+                                                "User-Agent": {
+                                                    "type": "string"
+                                                },
+                                                "X-CorrelationContext": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Compose": {
+                            "runAfter": {
+                                "Compose_4": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(variables('StrRequestBody'),',')[1]"
+                        },
+                        "Compose_2": {
+                            "runAfter": {
+                                "Compose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(outputs('Compose'),':')[2]"
+                        },
+                        "Compose_3": {
+                            "runAfter": {
+                                "Initialize_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(variables('StrRequestBody'),',')[3]"
+                        },
+                        "Compose_4": {
+                            "runAfter": {
+                                "Compose_3": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(outputs('Compose_3'),':')[1]"
+                        },
+                        "Compose_5": {
+                            "runAfter": {
+                                "Initialize_variable_2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(variables('StrHttpRequest'),',')[1]"
+                        },
+                        "Compose_6": {
+                            "runAfter": {
+                                "Compose_5": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(outputs('Compose_5'),':')[1]"
+                        },
+                        "Initialize_variable": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "StrRequestBody",
+                                        "type": "string",
+                                        "value": "@{triggerBody()?['data']?['context']?['activitylog']?['properties']?['requestbody']}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_variable_2": {
+                            "runAfter": {
+                                "Compose_2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "StrHttpRequest",
+                                        "type": "string",
+                                        "value": "@{triggerbody()?['data']?['context']?['activitylog']?['httpRequest']}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Post_a_message_(V3)": {
+                            "runAfter": {
+                                "Compose_6": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "body": {
+                                        "content": "<p><strong>Caller</strong>: &nbsp;@{triggerBody()?['data']?['context']?['activitylog']?['caller']}<br>\n<strong>Action</strong>: @{triggerBody()?['data']?['context']?['activitylog']?['authorization']?['action']}<br>\n<strong>Scope</strong>: @{triggerBody()?['data']?['context']?['activitylog']?['authorization']?['scope']} &nbsp;<br>\n<strong>CorrelationId</strong>: @{triggerBody()?['data']?['context']?['activitylog']?['correlationId']}<br>\n<br>\n<strong>From IP</strong>: @{outputs('Compose_6')}<br>\n<strong>PrincipalId Added</strong>: @{outputs('Compose_2')}<br>\n<strong>RoleDefinitionId Added:</strong> @{outputs('Compose_4')}</p>",
+                                        "contentType": "html"
+                                    },
+                                    "subject": "WARNING - RBAC Added"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['teams']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "[variables('TeamsPath')]"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "teams": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]",
+                                "connectionName": "teams",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "[variables('LogicWorkflowAPIVersion')]",
+            "name": "[variables('RemoveRoleLogicAppName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "method": "POST",
+                                "schema": {
+                                    "properties": {
+                                        "body": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "context": {
+                                                            "properties": {
+                                                                "activityLog": {
+                                                                    "properties": {
+                                                                        "authorization": {
+                                                                            "properties": {
+                                                                                "action": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "scope": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "caller": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "channels": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "claims": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "correlationId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "description": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "eventDataId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "eventSource": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "eventTimestamp": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "httpRequest": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "level": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "operationId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "operationName": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "properties": {
+                                                                            "properties": {
+                                                                                "category": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "responseBody": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "serviceRequestId": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "statusCode": {
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "resourceId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "resourceProviderName": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "resourceType": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "status": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "subStatus": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "submissionTimestamp": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "subscriptionId": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "properties": {
+                                                            "properties": {},
+                                                            "type": "object"
+                                                        },
+                                                        "status": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "schemaId": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "headers": {
+                                            "properties": {
+                                                "Connection": {
+                                                    "type": "string"
+                                                },
+                                                "Content-Length": {
+                                                    "type": "string"
+                                                },
+                                                "Content-Type": {
+                                                    "type": "string"
+                                                },
+                                                "Expect": {
+                                                    "type": "string"
+                                                },
+                                                "Host": {
+                                                    "type": "string"
+                                                },
+                                                "User-Agent": {
+                                                    "type": "string"
+                                                },
+                                                "X-CorrelationContext": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Compose": {
+                            "runAfter": {
+                                "Compose_6": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(variables('StrresponseBody'),',')[1]"
+                        },
+                        "Compose_2": {
+                            "runAfter": {
+                                "Compose": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(outputs('Compose'),':')[1]"
+                        },
+                        "Compose_3": {
+                            "runAfter": {
+                                "Initialize_variable_2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(variables('StrHttpRequest'),',')[1]"
+                        },
+                        "Compose_4": {
+                            "runAfter": {
+                                "Compose_3": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(outputs('Compose_3'),':')[1]"
+                        },
+                        "Compose_5": {
+                            "runAfter": {
+                                "Initialize_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(variables('StrresponseBody'),',')[0]"
+                        },
+                        "Compose_6": {
+                            "runAfter": {
+                                "Compose_5": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Compose",
+                            "inputs": "@split(outputs('Compose_5'),':')[2]"
+                        },
+                        "Initialize_variable": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "StrresponseBody",
+                                        "type": "string",
+                                        "value": "@{triggerbody()?['data']?['context']?['activitylog']?['properties']?['responseBody']}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_variable_2": {
+                            "runAfter": {
+                                "Initialize_variable_3": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "StrHttpRequest",
+                                        "type": "string",
+                                        "value": "@{triggerbody()?['data']?['context']?['activitylog']?['httpRequest']}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_variable_3": {
+                            "runAfter": {
+                                "Compose_2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "IdentityRemoved",
+                                        "type": "string",
+                                        "value": "@{outputs('Compose_2')}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Post_a_message_(V3)": {
+                            "runAfter": {
+                                "Compose_4": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "body": {
+                                        "content": "<p><strong>Caller</strong>: @{triggerBody()?['data']?['context']?['activitylog']?['caller']}<br>\n<strong>Action</strong>: @{triggerBody()?['data']?['context']?['activitylog']?['authorization']?['action']}<br>\n<strong>Scope</strong>: @{triggerBody()?['data']?['context']?['activitylog']?['authorization']?['scope']}<br>\n<strong>CorrelationId</strong>: @{triggerBody()?['data']?['context']?['activitylog']?['correlationId']}<br>\n<strong>From Ip</strong>: @{outputs('Compose_4')}<br>\n<strong>Identity removed</strong>: @{variables('IdentityRemoved')}<br>\n<strong>RoleDefinitionId removed</strong>: @{outputs('Compose_6')}</p>",
+                                        "contentType": "html"
+                                    },
+                                    "subject": "WARNING - RBAC Deleted"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['teams']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "[variables('TeamsPath')]"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "teams": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('TeamsConnectionName'))]",
+                                "connectionName": "teams",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/teams')]"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "microsoft.insights/actionGroups",
+            "apiVersion": "[variables('ActionGroupAPIVersion')]",
+            "name": "[variables('AddRoleLogicAppName')]",
+            "location": "Global",
+            "properties": {
+                "groupShortName": "RBAC added",
+                "enabled": true,
+                "emailReceivers": [],
+                "smsReceivers": [],
+                "webhookReceivers": [
+                    {
+                        "name": "RBAC added",
+                        "serviceUri": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', variables('AddRoleLogicAppName')), '/triggers/manual'), variables('LogicWorkflowAPIVersion')).value]",
+                        "useCommonAlertSchema": false
+                    }
+                ],
+                "itsmReceivers": [],
+                "azureAppPushReceivers": [],
+                "automationRunbookReceivers": [],
+                "voiceReceivers": [],
+                "logicAppReceivers": [],
+                "azureFunctionReceivers": []
+            }
+        },
+        {
+            "type": "microsoft.insights/actionGroups",
+            "apiVersion": "[variables('ActionGroupAPIVersion')]",
+            "name": "[variables('RemoveRoleLogicAppName')]",
+            "location": "Global",
+            "properties": {
+                "groupShortName": "RBAC removed",
+                "enabled": true,
+                "emailReceivers": [],
+                "smsReceivers": [],
+                "webhookReceivers": [
+                    {
+                        "name": "RBAC removed",
+                        "serviceUri": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows', variables('RemoveRoleLogicAppName')), '/triggers/manual'), variables('LogicWorkflowAPIVersion')).value]",
+                        "useCommonAlertSchema": false
+                    }
+                ],
+                "itsmReceivers": [],
+                "azureAppPushReceivers": [],
+                "automationRunbookReceivers": [],
+                "voiceReceivers": [],
+                "logicAppReceivers": [],
+                "azureFunctionReceivers": []
+            }
+        },
+        {
+            "type": "microsoft.insights/activityLogAlerts",
+            "apiVersion": "[variables('ActivityLogAlertsAPIVersion')]",
+            "name": "[variables('AddRoleLogicAppName')]",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('microsoft.insights/actionGroups', variables('AddRoleLogicAppName'))]"
+            ],
+            "properties": {
+                "scopes": [
+                    "[variables('SubscriptionScope')]"
+                ],
+                "condition": {
+                    "allOf": [
+                        {
+                            "field": "category",
+                            "equals": "Administrative"
+                        },
+                        {
+                            "field": "resourceType",
+                            "equals": "Microsoft.Authorization/roleAssignments"
+                        },
+                        {
+                            "field": "operationName",
+                            "equals": "Microsoft.Authorization/roleAssignments/write"
+                        },
+                        {
+                            "field": "status",
+                            "equals": "started"
+                        }
+                    ]
+                },
+                "actions": {
+                    "actionGroups": [
+                        {
+                            "actionGroupId": "[resourceId('microsoft.insights/actionGroups', variables('AddRoleLogicAppName'))]",
+                            "webhookProperties": {}
+                        }
+                    ]
+                },
+                "enabled": true,
+                "description": "This alert is triggered when someone add a new identity to a scope (subscription/RG/Resource)"
+            }
+        },
+        {
+            "type": "microsoft.insights/activityLogAlerts",
+            "apiVersion": "[variables('ActivityLogAlertsAPIVersion')]",
+            "name": "[variables('RemoveRoleLogicAppName')]",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('microsoft.insights/actionGroups', variables('RemoveRoleLogicAppName'))]"
+            ],
+            "properties": {
+                "scopes": [
+                    "[variables('SubscriptionScope')]"
+                ],
+                "condition": {
+                    "allOf": [
+                        {
+                            "field": "category",
+                            "equals": "Administrative"
+                        },
+                        {
+                            "field": "resourceType",
+                            "equals": "Microsoft.Authorization/roleAssignments"
+                        },
+                        {
+                            "field": "level",
+                            "equals": "informational"
+                        },
+                        {
+                            "field": "status",
+                            "equals": "Succeeded"
+                        }
+                    ]
+                },
+                "actions": {
+                    "actionGroups": [
+                        {
+                            "actionGroupId": "[resourceId('microsoft.insights/actionGroups', variables('RemoveRoleLogicAppName'))]",
+                            "webhookProperties": {}
+                        }
+                    ]
+                },
+                "enabled": true
+            }
+        }      
+    ],
+    "outputs": {}
+}
