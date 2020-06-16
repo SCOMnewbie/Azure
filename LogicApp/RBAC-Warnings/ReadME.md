@@ -31,7 +31,7 @@ The flow is simple:
 
 ## Deployment
 
-[![Deploy to azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fgithub.com%2FSCOMnewbie%2FAzure%2Fblob%2Fmaster%2FLogicApp%2FRBAC-Warnings%2Fdeploy.json)
+[![Deploy to azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FSCOMnewbie%2FAzure%2Fmaster%2FLogicApp%2FRBAC-Warnings%2Fdeploy.json)
 
 :warning: If you deploy the template, you will have to “Authorize” your Teams connection at the first deployment. You simply have to go into the RG, click on the Teams connector and then click on “edit API connection”. From here you can Authorize your connection.
 
