@@ -14,8 +14,8 @@ So what is the purpose of this badass name (I have no imagination for names...).
 
 3- Let’s now define a standard that we will share to the whole company.
 
-    3.1 Use two specific tags if you’re interested
-    3.2 Value must use the format ‘24:00’
+    3.1 Use two specific tags if you’re interested to start or stop your VM.
+    3.2 To be effective, tag value must use the format ‘24:00’.
 
 In other words, 2 tags will be shared (**Startup-UTC-24:00/Shutdown-UTC-24:00**) and people will be able to choose their value. The nice thing with tags is that it’s shared across subscriptions.
 
