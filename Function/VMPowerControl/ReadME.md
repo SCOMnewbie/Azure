@@ -33,7 +33,7 @@ and isnotnull(tags['Shutdown-UTC-24:00'])
 
 If you prefer pictures:
 
-![](images/archi.png)
+![](Images/archi.png)
 
 ## In plain text, what does it means?
 
@@ -53,17 +53,17 @@ Every 15 min I have 2 functions (Start and Stop) who run under a security contex
 
 ### If you want to shutdown your VM at 20:00 UTC
 
-![](images/shutdownonly.png)
+![](Images/shutdownonly.png)
 
 ### If you want to shutdown your VM at 20:02 and start it at 07:00 UTC
 
-![](images/shutdownstartup.png)
+![](Images/shutdownstartup.png)
 
 :warning: The order to shutdown the VM will be at 20:15, not 20:02 !
 
 ### If you don't read what you type
 
-![](images/wrongvalue.png)
+![](Images/wrongvalue.png)
 
 :vertical_traffic_light: Your machine won't receive any order. A warning message will be triggered in logs.
 
