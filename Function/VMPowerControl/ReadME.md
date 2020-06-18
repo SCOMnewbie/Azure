@@ -41,7 +41,7 @@ Every 15 min I have 2 functions (Start and Stop) who run under a security contex
 
 ## Highlights
 
-* You can find the code here.
+* You can find the code [here](https://github.com/SCOMnewbie/Azure/tree/master/Function/VMPowerControl).
 * The profile.ps1 has been modified:
     * To be able to use the MSI user, you have to replace the string '<MSUUserObjectId>' with the objectId of your MSI. Later the pipeline will take care of this.
     * 2 MSFT functions have been added for later usage
