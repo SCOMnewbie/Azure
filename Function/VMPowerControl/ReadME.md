@@ -45,7 +45,7 @@ Every 15 min I have 2 functions (Start and Stop) who run under a security contex
 
 * You can find the code [here](https://github.com/SCOMnewbie/Azure/tree/master/Function/VMPowerControl).
 * The profile.ps1 has been modified:
-    * To be able to use the MSI user, you have to replace the string '--MSUUserObjectId--' with the objectId of your MSI. Later the pipeline will take care of this.
+    * To be able to use the MSI user, you have to replace the string '--MSIUserObjectId--' with the objectId of your MSI. Later the pipeline will take care of this.
     * 2 MSFT functions have been added for later usage
 * The requirements.psd1 has been modified to add the module 'Az.ResourceGraph' when an instance start.
 * In the functionApp settings, I’ve set the MSI user (bless the new UI)

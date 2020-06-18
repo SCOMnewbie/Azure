@@ -12,7 +12,7 @@
 # Authenticate with Azure PowerShell using MSI.
 # Remove this if you are not planning on using MSI or Azure PowerShell.
 if ($env:MSI_SECRET -and (Get-Module -ListAvailable Az.Accounts)) {
-    Connect-AzAccount -Identity -AccountId '--MSUUserObjectId--'
+    Connect-AzAccount -Identity -AccountId '--MSIUserObjectId--'
 }
 
 #From https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api
