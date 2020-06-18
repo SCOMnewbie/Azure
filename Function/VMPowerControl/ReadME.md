@@ -13,8 +13,10 @@ So what is the purpose of this badass name (I have no imagination for names...).
 2- This is how I push a user-assigned MSI on all RBAC tables.
 
 3- Let’s now define a standard that we will share to the whole company.
-    a. Use two specific tags if you’re interested
-    b. Value must use the format ‘24:00’
+
+    3.1 Use two specific tags if you’re interested
+    3.2 Value must use the format ‘24:00’
+
 In other words, 2 tags will be shared (**Startup-UTC-24:00/Shutdown-UTC-24:00**) and people will be able to choose their value. The nice thing with tags is that it’s shared across subscriptions.
 
 4- Now that you know what you’re looking for, what is the quickest way to inventory your Azure organization? Graph explorer! Let’s use a query like this:
