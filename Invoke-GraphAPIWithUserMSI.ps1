@@ -1,3 +1,8 @@
+<#
+    Quick function to get an access token for a specific scope (graph.microsoft.com in this case) with a User Managed Identity from an Azure function. 
+    You can do the same with a System Managed Identity if you remove the client Id part in the query.
+#>
+
 using namespace System.Net
 
 # Input bindings are passed in via param block.
