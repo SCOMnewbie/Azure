@@ -1,4 +1,5 @@
-#Requires –Modules MSAL.PS
+#requires -modules "MSAL.PS"
+
 [cmdletbinding()]
 param(
     [bool]$DevideCode,
