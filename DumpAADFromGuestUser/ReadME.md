@@ -1,6 +1,6 @@
 # Dump AAD tenant from a guest account (default behavior)
 
-Following this [article](Restrict guest user access permissions - Azure Active Directory | Microsoft Docs), it seems that by default you can extract a lot of things with a guest user account. I’ve written those 2 proofs of concepts scripts (ADAL and MSAL for fun) to expose how you can extract an entire AAD tenant easily. We’re talking about extracting at least direct reports (manager), memberOf groups, and managers...
+Following this [article](https://docs.microsoft.com/en-us/azure/active-directory/users-groups-roles/users-restrict-guest-permissions), it seems that by default you can extract a lot of things with a guest user account. I’ve written those 2 proofs of concepts scripts (ADAL and MSAL for fun) to expose how you can extract an entire AAD tenant easily. We’re talking about extracting **at least direct reports (manager), memberOf groups, and managers**...
 
 To reproduce:
 
