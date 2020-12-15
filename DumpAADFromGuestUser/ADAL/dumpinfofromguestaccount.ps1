@@ -13,7 +13,7 @@ Add-Type -Path '.\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.d
 #Known ID for Powershell shell
 $clientId = "1950a258-227b-4e31-a9cf-717495945fc2"
 #TenantID. Easy to find, for example with > https://login.windows.net/<your domain>.onmicrosoft.com/.well-known/openid-configuration
-$tenantId = "<You're TenantId>"
+$tenantId = "<Your TenantId>"
 
 $resourceId = 'https://graph.microsoft.com'
 $login = "https://login.microsoftonline.com"
