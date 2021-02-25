@@ -5,8 +5,6 @@ This function helps you to generate an Access Token for various audiences (Keyva
 https://docs.microsoft.com/en-us/azure/azure-arc/servers/agent-overview
 This function will use the local MSI endpoint generated during the agent installation to create an access token you will be able to use for various scopes. The idea behind this script is
 to avoid having to set password/secret in your local dev machine/ pipeline runners to be passwordless from A to Z. 
-.PARAMETER ARCTokensPath
-Specify the installation path of the ARC agent.
 .PARAMETER Audience
 Specify the Audience you want to send the generated ccess Token to.
 .EXAMPLE
@@ -17,21 +15,22 @@ Will generate an access token to access your Keyvault.
 VERSION HISTORY
 1.0 | 2021/02/17 | Francois LEON
     initial version - Tested on Windows machine
+1.1 | 2021/02/25 | Francois LEON
+    Make it linux compliant too
 POSSIBLE IMPROVEMENT
-    # Make it Linux compatible
-    #Is ARC detected
-    # Is port listening
-    # Get Arc installation path
+    Is ARC detected
 #>
 Function New-ARCAccessTokenMSI {
     [CmdletBinding()]
     param (
-        [parameter(Mandatory=$false)]
-        [string] $ARCTokensPath = 'C:\ProgramData\AzureConnectedMachineAgent\Tokens',
         [parameter(Mandatory)]
         [ValidateSet('Keyvault','ARM','GraphAPI','StorageAccount')]
         [string] $Audience
     )
+
+    if([int]$PSVersionTable.PSVersion.Major -ne 7){
+        throw "This is a Powershell 7 function only..."
+    }
 
     $LocalMSIEndpoint = "http://localhost:40342/metadata/identity/oauth2/token?api-version=2020-06-01"
 
@@ -42,13 +41,22 @@ Function New-ARCAccessTokenMSI {
         "StorageAccount" {$AudienceURI = "$LocalMSIEndpoint&resource=https%3A%2F%2Fstorage.azure.com"}
     }
 
+    #Define token path depending on the OS
+    if($IsLinux){
+        [string] $ARCTokensPath = '/var/opt/azcmagent/tokens'
+    }
+    else{
+        [string] $ARCTokensPath = 'C:\ProgramData\AzureConnectedMachineAgent\Tokens'
+    }
+    $ARCTokensPath = Join-Path $ARCTokensPath -ChildPath "*.key"
+
     #Why 4 ? Why not
     for ($i = 0; $i -lt 4; $i++) {
         try{
             $Headers = @{
                 Metadata="true"
                 #Construct the path where the AT will be generated
-                Authorization="Basic $(Get-Content -Path $(Join-Path $ARCTokensPath "*.key") -ErrorAction SilentlyContinue)"
+                Authorization="Basic $(Get-Content -Path $ARCTokensPath -ErrorAction SilentlyContinue)"
             }
             $response = Invoke-RestMethod -Uri $AudienceURI -Headers $Headers -ErrorAction SilentlyContinue
             break
