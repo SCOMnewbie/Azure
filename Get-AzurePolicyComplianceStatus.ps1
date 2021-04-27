@@ -13,7 +13,7 @@ function Get-AzurePolicyComplianceStatus {
     Specify the AccessToken used to execute the query.
 
     .EXAMPLE
-    PS> $AccessToken = az account get-access-token --resource "https://management.azure.com"  | ConvertFrom-Json | select -ExpandProperty accessToken
+    PS> $AccessToken = (Get-AzAccessToken -ResourceUrl "https://management.azure.com" ).Token
     PS> $Compliancestatus = Get-AzurePolicyComplianceStatus -AccessToken $AccessToken -PolicyDefinitionName '670a3e57-dcc3-6a8a-813f-e2669ee2f23e' -TenantId 'MyTenant'
     PS> $Compliancestatus | select subscriptionId, managementGroupIds, complianceState, iscompliant
 
