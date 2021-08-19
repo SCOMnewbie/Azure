@@ -5,7 +5,7 @@ This script will show how to rely on the Graph API batch endpoint to speed thing
 Instead of doing it one by one from your machine/server, you ask graph to execute them 20 by 20 and graph is quicker than your server :p.
 I went down from 13 minutes with 3000+ graph queries to 1 minute and 13 seconds, not bad?
 
-More info with the blog post here ->
+More info with the blog post here -> https://scomnewbie.github.io/posts/usegraphapibatching/
 
 # Pre requisites
 
