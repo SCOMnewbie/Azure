@@ -1,0 +1,101 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "containername": {
+            "type": "string",
+            "metadata": {
+                "description": "Name for the container"
+            }
+        },
+        "imagename": {
+            "type": "string",
+            "metadata": {
+                "description": "Name for the image"
+            }
+        },
+        "memoryInGb": {
+            "type": "string",
+            "metadata": {
+                "description": "The amount of memory to allocate to the container in gigabytes."
+            },
+            "defaultValue": "1.5"
+        },
+        "EnvironmentVariables": {
+            "type": "array",
+            "metadata": {
+                "description": "All environment variables fo our container"
+            }
+        },
+        "imageRegistryCredentialsServer": {
+            "type": "String",
+            "metadata": {
+                "description": "ACR server"
+            }
+        },
+        "imageRegistryCredentialsUserName": {
+            "type": "String",
+            "metadata": {
+                "description": "ACR username"
+            }
+        },
+        "imageRegistryCredentialsPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "ACR password"
+            }
+        },
+        "UserMSIResourceId": {
+            "type": "String",
+            "metadata": {
+                "description": "User MSI used with the ACI"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "aciapiVersion": "2019-12-01"
+    },
+    "resources": [
+        {
+            "name": "[toLower(parameters('containername'))]",
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "[variables('aciapiVersion')]",
+            "location": "[resourceGroup().location]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[parameters('UserMSIResourceId')]": {
+                    }
+                }
+            },
+            "properties": {
+                "containers": [
+                    {
+                        "name": "[toLower(parameters('containername'))]",
+                        "properties": {
+                            "image": "[parameters('imagename')]",
+                            "resources": {
+                                "requests": {
+                                    "cpu": 1,
+                                    "memoryInGB": "[parameters('memoryInGb')]"
+                                }
+                            },
+                            "environmentVariables": "[parameters('EnvironmentVariables')]"
+                        }
+                    }
+                ],
+                "osType": "Linux",
+                "imageRegistryCredentials": [
+                    {
+                        "server": "[parameters('imageRegistryCredentialsServer')]",
+                        "username": "[parameters('imageRegistryCredentialsUserName')]",
+                        "password": "[parameters('imageRegistryCredentialsPassword')]"
+                    }
+                ],
+                "restartPolicy": "Never"
+            }
+        }
+    ],
+    "outputs": {}
+}
