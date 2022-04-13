@@ -20,7 +20,7 @@ $password = ConvertTo-SecureString -String $plainPwd -AsPlainText -Force
 $cred = New-Object System.Management.Automation.PSCredential($___USERNAME,$password)
 
 # Now we generate a token for our service account in charge of "doing things"
-# We can't have interraction here, ROPC flow is the only way.
+# We can't have interraction here, ROPC flow is the only way if we want to use delegated permission.
 Write-host "Generate an access token to access graph API .default scope (user context with delegated permission)"
 if($___tenantid){
     $Token = Get-MsalToken -ClientId $___appId -TenantId $___tenantid -Scopes 'https://graph.microsoft.com/.default' -RedirectUri 'http://localhost' -UserCredential $cred | select -ExpandProperty AccessToken
@@ -38,7 +38,7 @@ $Headers = @{
 }
 
 Write-host "Let's call the me route to get the current context"
-# Here you can imagine all your script actions
+# Here you can imagine all your script actions. In this case, we just simulate our delegated action with /me endpoint.
 Get-GraphAPIMe -Headers $headers
 
 #Once the job done, this is where we will callback our orchestration function but this time we can't just use the URL, even with the code
