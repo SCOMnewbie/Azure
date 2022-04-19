@@ -1,0 +1,1 @@
+"AadClientId": "a7c7e177-e7c0-4c93-9177-2dae3387c6a1","AadSecret": "DUv7Q~O34bhFjo5joP0OmEQooXfUllix0JxYj","AadTenantId": "9fc48040-bd8c-4f3f-b7b3-ff17cbf04b20","Name"; "LeakedApp"
