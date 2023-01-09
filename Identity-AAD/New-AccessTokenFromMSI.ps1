@@ -9,6 +9,8 @@ to avoid having to set password/secret in your local dev machine/ pipeline runne
 Specify the Audience you want to send the generated ccess Token to.
 .PARAMETER FromARCVm
 Specify if you run this command from an ARC VM.
+.PARAMETER CustomScope
+Specify the custom scope.
 .EXAMPLE
 #Generate an access token for Keyvault from an ARC machine
 $KeyvaultToken = New-AccessTokenFromMSI -Audience Keyvault -FromARCVm
@@ -17,6 +19,11 @@ Will generate an access token to access your Keyvault.
 #Generate an access token for Keyvault from a native Azure VM
 $KeyvaultToken = New-AccessTokenFromMSI -Audience Keyvault
 Will generate an access token to access your Keyvault.
+.EXAMPLE
+#Generate an access token for a custom scope and call web api
+$token = New-AccessTokenFromMSI -Audience Custom -CustomScope 'api://accc94e1-cd6f-4d80-ce41-1033d8545b6e' -FromARCVm
+irm -Uri 'https://funwitharc.azurewebsites.net/api/HttpTrigger1' -Headers @{"Authorization"= "Bearer $token"} -Body @{"Name"="fanf"}
+Will generate an access token and use it to access protected web api.
 .NOTES
 VERSION HISTORY
 1.0 | 2021/02/17 | Francois LEON
@@ -26,17 +33,21 @@ VERSION HISTORY
 1.2 | 2021/11/30 | Francois LEON
     Rename the function
     Make it native MSI aware
+1.3 | 2023/01/09 | Francois LEON
+    Little refactor
+    Add custom scope
+    Add azure monitor scope
 POSSIBLE IMPROVEMENT
-    Is ARC detected
+    -
 #>
 Function New-AccessTokenFromMSI {
     [CmdletBinding()]
     param (
         [parameter(Mandatory)]
-        [ValidateSet('Keyvault','ARM','GraphAPI','StorageAccount')] #Add custom api later
+        [ValidateSet('Keyvault','ARM','GraphAPI','StorageAccount','Monitor','Custom')] #Add custom api later
         [string] $Audience,
-        [switch]$FromARCVm #Is this command executed from ARC machine or Azure VM directly?
-
+        [string] $CustomScope = $null, #https:// ... should be used only with Custom Audience
+        [switch] $FromARCVm #Is this command executed from ARC machine or Azure VM directly?
     )
 
     if ([int]$PSVersionTable.PSVersion.Major -ne 7) {
@@ -51,16 +62,24 @@ Function New-AccessTokenFromMSI {
     }
     
     switch ($Audience) {
-        'Keyvault' { $AudienceURI = "$MSIEndpoint&resource=https%3A%2F%2Fvault.azure.net";break }
-        'ARM' { $AudienceURI = "$MSIEndpoint&resource=https%3A%2F%2Fmanagement.azure.com";break }
-        'GraphAPI' { $AudienceURI = "$MSIEndpoint&resource=https%3A%2F%2Fgraph.microsoft.com";break }
-        'StorageAccount' { $AudienceURI = "$MSIEndpoint&resource=https%3A%2F%2Fstorage.azure.com" }
+        'Keyvault' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode("https://vault.azure.net");break }
+        'ARM' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode("https://management.azure.com");break }
+        'GraphAPI' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode("https://graph.microsoft.com");break }
+        'StorageAccount' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode("https://storage.azure.com");break }
+        'Monitor' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode("https://monitor.azure.com");break }
+        default {$EncodedURI = [System.Web.HttpUtility]::UrlEncode($CustomScope) }
     }
+
+    $AudienceURI = "{0}&resource={1}" -f $MSIEndpoint,$EncodedURI
 
     if ($FromARCVm) {
         #Define token path depending on the OS
         if ($IsLinux) {
-            [string] $ARCTokensPath = '/var/opt/azcmagent/tokens'
+            # Add user ubuntu to himds group
+            # sudo usermod -a -G himds ubuntu
+            # Add himds read + execution permission to /var/opt/azcmagent/tokens directory 
+            # sudo chmod g+rx /var/opt/azcmagent/tokens
+            [string] $ARCTokensPath = '/var/opt/azcmagent/tokens' #Require read access to /var/opt/azcmagent/tokens
         }
         else {
             [string] $ARCTokensPath = 'C:\ProgramData\AzureConnectedMachineAgent\Tokens'
