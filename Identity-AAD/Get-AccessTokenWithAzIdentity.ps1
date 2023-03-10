@@ -25,7 +25,7 @@
     [CmdletBinding()]
     param (
         [parameter(Mandatory)]
-        [ValidateSet('Keyvault','ARM','GraphAPI','Storage','Monitor','Custom')] #Add custom api later
+        [ValidateSet('Keyvault','ARM','GraphAPI','Storage','Monitor', 'LogAnalytics','Custom')] #Add custom api later
         [string] $Audience,
         [string] $CustomScope = $null #https:// ... should be used only with Custom Audience like api://<your api>
     )
@@ -53,6 +53,7 @@
             'GraphAPI' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode('https://graph.microsoft.com');break }
             'Storage' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode('https://storage.azure.com');break }
             'Monitor' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode('https://monitor.azure.com');break }
+            'LogAnalytics' { $EncodedURI = [System.Web.HttpUtility]::UrlEncode('https://api.loganalytics.io');break }
             default { $EncodedURI = [System.Web.HttpUtility]::UrlEncode($CustomScope) }
         }
 
