@@ -61,7 +61,7 @@
     #Ordered otherwise the gcloud cli become crazy ...
     $ConfigFile = [ordered]@{
         type                              = 'external_account'
-        audience                          = $('//iam.googleapis.com/projects/{0}/locations/global/workloadIdentityPools/{1}/providers/{2}' -f $ProjectId,$ProviderName,$WorkloadIdentityPoolName)
+        audience                          = $('//iam.googleapis.com/projects/{0}/locations/global/workloadIdentityPools/{1}/providers/{2}' -f $ProjectNumber,$ProviderName,$WorkloadIdentityPoolName)
         subject_token_type                = 'urn:ietf:params:oauth:token-type:jwt'
         token_url                         = 'https://sts.googleapis.com/v1/token'
         service_account_impersonation_url = $('https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/{0}:generateAccessToken' -f $ServiceAccountEmail)
