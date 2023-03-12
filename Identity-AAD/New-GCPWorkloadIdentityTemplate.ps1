@@ -7,8 +7,8 @@
     This function will bootstrap 2 files that you can use to connect to gcp.
     .PARAMETER FolderPath
     Specify the folder where the files will be generated.
-    .PARAMETER ProjectId
-    Specify the projectid where your workload identity pool is created.
+    .PARAMETER ProjectNumber
+    Specify the projectNumber where your workload identity pool is created.
     .PARAMETER ServiceAccountEmail
     Specify the email of your service account.
     .PARAMETER WorkloadIdentityPoolName
@@ -21,7 +21,7 @@
     Specify the AccessToken for the call.
     .EXAMPLE
     $HashArguments = @{
-    ProjectId = "12345678"
+    ProjectNumber = "12345678"
     WorkloadIdentityPoolName = 'mywip'
     ProviderName = 'myprovider'
     ServiceAccountEmail = "<myserviceccount>@<my project name>.iam.gserviceaccount.com"
@@ -46,7 +46,7 @@
             })]
         [String]$FolderPath,
         [parameter(Mandatory)]
-        [string]$ProjectId,
+        [string]$ProjectNumber,
         [parameter(Mandatory)]
         [string]$WorkloadIdentityPoolName,
         [parameter(Mandatory)]
