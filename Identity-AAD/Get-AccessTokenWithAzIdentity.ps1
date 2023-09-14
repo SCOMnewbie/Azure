@@ -19,6 +19,9 @@
 .EXAMPLE
      Get-AccessTokenWithAzIdentity -Audience Custom -CustomScope "api://<your exposed api>"
 
+.EXAMPLE
+    Get-AccessTokenWithAzIdentity -Audience Keyvault -UserMSIClientId '12345678-0000-0000-0000-000000000000'
+
 .OUTPUTS
     String
 #>
@@ -27,6 +30,7 @@
         [parameter(Mandatory)]
         [ValidateSet('Keyvault','ARM','GraphAPI','Storage','Monitor', 'LogAnalytics','Custom')] #Add custom api later
         [string] $Audience,
+        [string] $UserMSIClientId,
         [string] $CustomScope = $null #https:// ... should be used only with Custom Audience like api://<your api>
     )
 
@@ -109,6 +113,9 @@
             $MSIEndpoint = 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01' #According https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token#get-a-token-using-powershell
             $AudienceURI = '{0}&resource={1}' -f $MSIEndpoint,$EncodedURI
             Write-Verbose "Using uri: $AudienceURI"
+            if($UserMSIClientId){
+                $AudienceURI = '{0}&client_id={1}' -f $AudienceURI,$UserMSIClientId
+            }
             #Why 4 ? Why not
             for ($i = 0; $i -lt 4; $i++) {
                 try{$response = Invoke-RestMethod -Uri $AudienceURI -Headers $Headers -ErrorAction stop}catch{}
